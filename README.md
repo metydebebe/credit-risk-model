@@ -29,3 +29,32 @@ Direct default labels are absent since eCommerce users haven't undergone traditi
 | **Gradient Boosting**   | -  Higher accuracy<br>-  Captures complex interactions                                          | -  Black-box decisions hinder explanation<br>-  Harder to validate for capital calculations |
 
 **Resolution:** Basel II favors **interpretability** unless complexity demonstrably improves risk sensitivity without compromising transparency. Hybrid approaches (e.g., SHAP explanations for boosting) may balance this.
+
+## Task 2: Exploratory Data Analysis (EDA)
+
+### Key Findings
+
+1. **Severe target imbalance**  
+   Only 0.2% of transactions are fraudulent (193 cases), requiring specialized handling during modeling.
+
+2. **Extreme transaction values**  
+   `Amount` and `Value` show:
+
+   - Negative values (down to -1M UGX) suggesting refunds
+   - High positive skew (max 9.88M UGX) requiring transformation
+   - High standard deviation (123k) indicating volatility
+
+3. **Dominant categorical features**  
+   Key categories dominate distributions:
+
+   - 47.5% transactions in `financial_services`
+   - 39.9% through `ProviderId_4`
+   - 59.5% via `ChannelId_3`
+
+4. **Constant features**  
+   `CurrencyCode` (always UGX) and `CountryCode` (always 256) provide no predictive value.
+
+5. **Temporal feature potential**  
+   Transaction timestamps show high uniqueness, enabling time-based feature engineering.
+
+[View full EDA notebook](notebooks/1.0-eda.ipynb)
