@@ -88,7 +88,6 @@ def build_feature_engineering_pipeline():
         ('datetime_features', DateTimeFeatures())
     ])
 
-
     # Stage 2: ColumnTransformer for numerical and categorical processing
     numerical_pipeline = Pipeline([
         ('imputer', SimpleImputer(strategy='median')),
