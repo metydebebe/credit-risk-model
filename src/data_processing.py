@@ -1,5 +1,5 @@
 import pandas as pd
-import numpy as np
+# import numpy as np
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler
@@ -8,9 +8,25 @@ from feature_engine.encoding import WoEEncoder
 from sklearn.base import BaseEstimator, TransformerMixin
 
 # Define categorical and numerical columns globally for reuse
-categorical_cols = ['ProductCategory', 'ProviderId', 'ChannelId', 'PricingStrategy']
-numerical_cols = ['Amount', 'Value', 'std_amount', 'avg_amount', 'total_amount', 'transaction_count',
-                  'transaction_hour', 'transaction_day', 'transaction_month', 'transaction_year']
+categorical_cols = [
+    'ProductCategory', 
+    'ProviderId', 
+    'ChannelId', 
+    'PricingStrategy'
+]
+
+numerical_cols = [
+    'Amount', 
+    'Value', 
+    'std_amount', 
+    'avg_amount', 
+    'total_amount', 
+    'transaction_count',
+    'transaction_hour', 
+    'transaction_day', 
+    'transaction_month', 
+    'transaction_year'
+]
 
 
 class AggregateFeatures(BaseEstimator, TransformerMixin):
@@ -23,8 +39,10 @@ class AggregateFeatures(BaseEstimator, TransformerMixin):
         self.groupby_col = groupby_col
         self.amount_col = amount_col
 
+
     def fit(self, X, y=None):
         return self
+
 
     def transform(self, X):
         agg = X.groupby(self.groupby_col)[self.amount_col].agg(
@@ -46,8 +64,10 @@ class DateTimeFeatures(BaseEstimator, TransformerMixin):
     def __init__(self, datetime_col='TransactionStartTime'):
         self.datetime_col = datetime_col
 
+
     def fit(self, X, y=None):
         return self
+
 
     def transform(self, X):
         X = X.copy()
@@ -72,27 +92,32 @@ def build_feature_engineering_pipeline():
         ('datetime_features', DateTimeFeatures())
     ])
 
+
     # Stage 2: ColumnTransformer for numerical and categorical processing
     numerical_pipeline = Pipeline([
         ('imputer', SimpleImputer(strategy='median')),
         ('scaler', StandardScaler())
     ])
 
+
     categorical_pipeline = Pipeline([
         ('imputer', SimpleImputer(strategy='most_frequent')),
         ('woe_encoder', WoEEncoder(variables=categorical_cols))
     ])
+
 
     column_transformer = ColumnTransformer([
         ('num', numerical_pipeline, numerical_cols),
         ('cat', categorical_pipeline, categorical_cols)
     ], remainder='drop')
 
+
     # Full pipeline: preprocessor followed by column transformer
     full_pipeline = Pipeline([
         ('preprocessor', preprocessor),
         ('column_transformer', column_transformer)
     ])
+
 
     return full_pipeline
 
