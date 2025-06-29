@@ -9,7 +9,6 @@ from src.data_processing import (
 
 class TestFeatureEngineering(unittest.TestCase):
 
-
     def setUp(self):
         self.df = pd.DataFrame({
             'CustomerId': ['C1', 'C1', 'C2', 'C3', 'C3', 'C3'],
@@ -26,7 +25,6 @@ class TestFeatureEngineering(unittest.TestCase):
         })
         self.target = pd.Series([0, 1, 0, 1, 0, 1])
 
-
     def test_pipeline_runs(self):
         pipeline = build_feature_engineering_pipeline()
         # Fit WoE encoder with target before fitting pipeline
@@ -37,7 +35,6 @@ class TestFeatureEngineering(unittest.TestCase):
         X_transformed = pipeline.transform(self.df)
         self.assertEqual(X_transformed.shape[0], self.df.shape[0])
 
-
     def test_feature_names_and_shape(self):
         pipeline = build_feature_engineering_pipeline()
         cat_pipe = pipeline.named_steps['column_transformer'].named_transformers_['cat']
@@ -47,7 +44,6 @@ class TestFeatureEngineering(unittest.TestCase):
         X_transformed = pipeline.transform(self.df)
         expected_num_features = len(numerical_cols) + len(categorical_cols)
         self.assertEqual(X_transformed.shape[1], expected_num_features)
-
 
     def test_missing_value_imputation(self):
         df_missing = self.df.copy()
