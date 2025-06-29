@@ -9,22 +9,22 @@ from sklearn.base import BaseEstimator, TransformerMixin
 
 # Define categorical and numerical columns globally for reuse
 categorical_cols = [
-    'ProductCategory', 
-    'ProviderId', 
-    'ChannelId', 
+    'ProductCategory',
+    'ProviderId',
+    'ChannelId',
     'PricingStrategy'
 ]
 
 numerical_cols = [
-    'Amount', 
-    'Value', 
-    'std_amount', 
-    'avg_amount', 
-    'total_amount', 
+    'Amount',
+    'Value',
+    'std_amount',
+    'avg_amount',
+    'total_amount',
     'transaction_count',
-    'transaction_hour', 
-    'transaction_day', 
-    'transaction_month', 
+    'transaction_hour',
+    'transaction_day',
+    'transaction_month',
     'transaction_year'
 ]
 
@@ -39,10 +39,8 @@ class AggregateFeatures(BaseEstimator, TransformerMixin):
         self.groupby_col = groupby_col
         self.amount_col = amount_col
 
-
     def fit(self, X, y=None):
         return self
-
 
     def transform(self, X):
         agg = X.groupby(self.groupby_col)[self.amount_col].agg(
@@ -64,10 +62,8 @@ class DateTimeFeatures(BaseEstimator, TransformerMixin):
     def __init__(self, datetime_col='TransactionStartTime'):
         self.datetime_col = datetime_col
 
-
     def fit(self, X, y=None):
         return self
-
 
     def transform(self, X):
         X = X.copy()
@@ -99,18 +95,15 @@ def build_feature_engineering_pipeline():
         ('scaler', StandardScaler())
     ])
 
-
     categorical_pipeline = Pipeline([
         ('imputer', SimpleImputer(strategy='most_frequent')),
         ('woe_encoder', WoEEncoder(variables=categorical_cols))
     ])
 
-
     column_transformer = ColumnTransformer([
         ('num', numerical_pipeline, numerical_cols),
         ('cat', categorical_pipeline, categorical_cols)
     ], remainder='drop')
-
 
     # Full pipeline: preprocessor followed by column transformer
     full_pipeline = Pipeline([
@@ -118,13 +111,11 @@ def build_feature_engineering_pipeline():
         ('column_transformer', column_transformer)
     ])
 
-
     return full_pipeline
 
 
 def process_data(df, target=None):
     pipeline = build_feature_engineering_pipeline()
-
     # 1. Fit and transform preprocessor (aggregate + datetime features)
     pipeline.named_steps['preprocessor'].fit(df)
     df_transformed = pipeline.named_steps['preprocessor'].transform(df)
