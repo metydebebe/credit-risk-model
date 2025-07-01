@@ -1,0 +1,6 @@
+Metadata-Version: 2.1
+Name: credit_risk_model
+Version: 0.1
+Requires-Dist: feature-engine
+Requires-Dist: scikit-learn
+Requires-Dist: pandas
