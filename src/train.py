@@ -4,15 +4,15 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_auc_score
 import joblib
+import os
 import logging
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-
 def main():
     logger.info("Loading raw data...")
-    df = pd.read_csv('..data/raw/data.csv')
+    df = pd.read_csv('data/raw/data.csv')  # ✅ Make sure the relative path is correct
     target = df['FraudResult']
 
     logger.info("Processing features...")
@@ -20,7 +20,8 @@ def main():
 
     logger.info("Splitting data into train and validation sets...")
     X_train, X_val, y_train, y_val = train_test_split(
-        X, target, test_size=0.2, random_state=42, stratify=target)
+        X, target, test_size=0.2, random_state=42, stratify=target
+    )
 
     logger.info("Training Logistic Regression model...")
     model = LogisticRegression(max_iter=1000, random_state=42)
@@ -31,11 +32,11 @@ def main():
     auc = roc_auc_score(y_val, y_pred_proba)
     logger.info(f'Validation AUC: {auc:.4f}')
 
-    logger.info("Saving model and pipeline...")
+    logger.info("Saving model...")
+    os.makedirs('models', exist_ok=True)
     joblib.dump(model, 'models/logistic_model.joblib')
 
     logger.info("Training complete.")
-
 
 if __name__ == "__main__":
     main()

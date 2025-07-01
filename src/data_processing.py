@@ -1,5 +1,3 @@
-# src/data_processing.py
-
 import pandas as pd
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
@@ -59,19 +57,16 @@ def build_feature_engineering_pipeline():
     ])
 
 def build_encoding_pipeline():
-    # Categorical pipeline
     cat_pipe = Pipeline([
         ('imputer', SimpleImputer(strategy='most_frequent')),
         ('woe_encoder', WoEEncoder(variables=categorical_cols))
     ])
 
-    # Numerical pipeline
     num_pipe = Pipeline([
         ('imputer', SimpleImputer(strategy='median')),
         ('scaler', StandardScaler())
     ])
 
-    # Combine both
     transformer = ColumnTransformer([
         ('cat', cat_pipe, categorical_cols),
         ('num', num_pipe, numerical_cols)
@@ -81,11 +76,33 @@ def build_encoding_pipeline():
 
 def process_data(df: pd.DataFrame, target=None) -> pd.DataFrame:
     """
-    Separates feature engineering from transformation to ensure correct column handling.
+    Run feature engineering, then encoding/transformation.
     """
-    # First, feature engineering (adds std_amount, avg_amount, etc.)
+    # Feature engineering
     feature_engineer = build_feature_engineering_pipeline()
     df_fe = feature_engineer.fit_transform(df)
 
-    # Ensure expected columns exist
-    missing = [col for col in categorical_cols + numerical_cols if col not in df_fe.colum_]()
+    # Ensure categorical columns are strings (required for WoEEncoder)
+    for col in categorical_cols:
+        if col in df_fe.columns:
+            df_fe[col] = df_fe[col].astype(str)
+
+    # Validate required columns exist
+    missing = [col for col in categorical_cols + numerical_cols if col not in df_fe.columns]
+    if missing:
+        raise KeyError(f"Missing expected columns after feature engineering: {missing}")
+
+    # Fit and transform with encoding pipeline
+    transformer = build_encoding_pipeline()
+    if target is not None:
+        X_array = transformer.fit_transform(df_fe, target)
+    else:
+        X_array = transformer.transform(df_fe)
+
+    # Get feature names if possible
+    try:
+        feature_names = transformer.get_feature_names_out()
+    except Exception:
+        feature_names = [f"feature_{i}" for i in range(X_array.shape[1])]
+
+    return pd.DataFrame(X_array, columns=feature_names, index=df.index)

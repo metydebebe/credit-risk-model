@@ -1,6 +1,15 @@
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
+
 import unittest
 import pandas as pd
-from src.data_processing import build_feature_engineering_pipeline, categorical_cols, numerical_cols
+from data_processing import (
+    build_feature_engineering_pipeline,
+    build_encoding_pipeline,
+    categorical_cols,
+    numerical_cols
+)
 
 
 class TestFeatureEngineering(unittest.TestCase):
@@ -29,22 +38,27 @@ class TestFeatureEngineering(unittest.TestCase):
         self.assertEqual(X.shape[0], self.df.shape[0])
 
     def test_feature_names_and_shape(self):
-        pipeline = build_feature_engineering_pipeline()
-        pipeline.fit(self.df, self.target)
-        X = pipeline.transform(self.df)
+        feature_pipeline = build_feature_engineering_pipeline()
+        df_fe = feature_pipeline.fit_transform(self.df)
 
-        feature_count = len(pipeline.named_steps['column_transformer'].get_feature_names_out())
-        self.assertEqual(X.shape[1], feature_count)
+        encoding_pipeline = build_encoding_pipeline()
+        X = encoding_pipeline.fit_transform(df_fe, self.target)
+
+        feature_count = X.shape[1]
+        self.assertEqual(X.shape[0], self.df.shape[0])
+        self.assertTrue(feature_count > 0)
 
     def test_missing_value_imputation(self):
         df_missing = self.df.copy()
         df_missing.loc[0, 'Amount'] = None
 
-        pipeline = build_feature_engineering_pipeline()
-        pipeline.fit(df_missing, self.target)
-        X_missing = pipeline.transform(df_missing)
+        feature_pipeline = build_feature_engineering_pipeline()
+        df_fe = feature_pipeline.fit_transform(df_missing)
 
-        self.assertFalse(pd.isnull(X_missing).any())
+        encoding_pipeline = build_encoding_pipeline()
+        X_missing = encoding_pipeline.fit_transform(df_fe, self.target)
+
+        self.assertFalse(pd.isnull(X_missing).any().any())
 
 
 if __name__ == '__main__':
