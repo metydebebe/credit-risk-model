@@ -1,6 +1,6 @@
 # Credit Risk Probability Model for Alternative Data
 
-# Task 1 - Credit Scoring Business Understanding
+## Task 1 - Credit Scoring Business Understanding
 
 ### 1. Basel II Accord's Influence on Model Requirements
 
@@ -58,3 +58,85 @@ Direct default labels are absent since eCommerce users haven't undergone traditi
    Transaction timestamps show high uniqueness, enabling time-based feature engineering.
 
 [View full EDA notebook](notebooks/1.0-eda.ipynb)
+
+## Task 3: Feature Engineering & Encoding
+
+### What It Does
+
+Builds a feature engineering pipeline to process raw transaction data.
+
+Applies transformations (e.g., missing value imputation, aggregation).
+
+Encodes categorical and numerical features for model training.
+
+### Key Components
+
+build_feature_engineering_pipeline(): Returns a pipeline for feature generation.
+
+build_encoding_pipeline(): Returns a pipeline for encoding features.
+
+categorical_cols, numerical_cols: Lists of categorical and numerical columns.
+
+### Usage
+
+python
+from data_processing import build_feature_engineering_pipeline, build_encoding_pipeline
+
+feature_pipeline = build_feature_engineering_pipeline()
+df_fe = feature_pipeline.fit_transform(df)
+
+encoding_pipeline = build_encoding_pipeline()
+X = encoding_pipeline.fit_transform(df_fe, target)
+
+## Task 4: Proxy Target Creation
+
+### What It Does
+
+Calculates RFM metrics per customer.
+
+Clusters customers using KMeans on scaled RFM features.
+
+Assigns a binary "is_high_risk" label based on cluster characteristics.
+
+### Key Components
+
+calculate_rfm(df, ...): Computes RFM features.
+
+cluster_customers(rfm_df, ...): Clusters customers.
+
+assign_high_risk_label(rfm_df): Identifies high-risk cluster.
+
+create_proxy_target(df, ...): Full pipeline returning a DataFrame with CustomerId and is_high_risk.
+
+### Usage
+
+python
+from proxy_target import create_proxy_target
+
+proxy_target_df = create_proxy_target(df)
+Running the Model Training Pipeline
+Load raw data:
+df = pd.read_csv('data/raw/data.csv')
+
+Create proxy target:
+proxy_target_df = create_proxy_target(df)
+
+Merge and process features:
+df = df.merge(proxy_target_df, on='CustomerId', how='left')
+X = process_data(df, target=df['is_high_risk'])
+
+Train/test split, model training, evaluation, and saving.
+
+## Testing
+
+tests/test_data_processing.py: Tests feature engineering and encoding.
+
+tests/test_proxy_target.py: Tests proxy target creation.
+
+## Understanding and Resolving the KeyError
+
+### Error Summary
+
+Both test_feature_names_and_shape and test_missing_value_imputation fail with:
+
+KeyError: "None of [Index(['ProductCategory', 'ProviderId', 'ChannelId', 'PricingStrategy'], dtype='object')] are in the [columns]"
